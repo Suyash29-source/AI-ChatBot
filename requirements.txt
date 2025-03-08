@@ -4,3 +4,4 @@ torch
 gradio
 flask
 openai
+flask_cors
