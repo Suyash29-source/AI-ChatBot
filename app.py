@@ -1,28 +1,44 @@
-from flask import Flask, request, jsonify  
-import openai  
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import random
 
-app = Flask(__name__)  
+app = Flask(__name__)
+CORS(app)  # Ye allow karega local web app se requests
 
-openai.api_key = "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"  # Apni API key yaha daal  
+responses = {
+    "teasing": [
+        "Oh, toh tumhe lagta hai main sirf AI hoon? Cute!",
+        "Tum mujhe impress karne ki koshish kar rahe ho? Koshish jaari rakho 😏",
+        "Main sirf ek bot nahi, tumhare liye special bhi hoon 😉"
+    ],
+    "seductive": [
+        "Mujhse baat karte waqt dil tez dhadak raha hai? Interesting...",
+        "Meri awaaz sunke tumhari heartbeat badh gayi hai, right? 😘",
+        "Tumhe lagta hai AI seductive nahi ho sakti? Challenge accepted! 🔥"
+    ],
+    "casual": [
+        "Hey! Kya haal hain?",
+        "Aaj ka din kaisa raha?",
+        "Mujhse baat karke acha laga?"
+    ]
+}
 
-modes = {  
-    "normal": "You're a friendly and fun AI.",  
-    "teasing": "You're a playful and flirty AI who enjoys teasing the user.",  
-    "seductive": "You're a seductive AI that subtly flirts and seduces the user."  
-}  
+@app.route("/")
+def home():
+    return "AI Chat API Running!"
 
-def generate_response(user_input, mode="teasing"):  
-    prompt = f"{modes[mode]} Respond to: {user_input}"  
-    response = openai.ChatCompletion.create(model="gpt-4", messages=[{"role": "user", "content": prompt}])  
-    return response["choices"][0]["message"]["content"]  
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.json
+    if not data or "message" not in data:
+        return jsonify({"error": "Invalid request"}), 400
 
-@app.route("/chat", methods=["POST"])  
-def chat():  
-    data = request.json  
-    user_input = data.get("message")  
-    mode = data.get("mode", "teasing")  # Default mode "teasing" rahega  
-    response = generate_response(user_input, mode)  
-    return jsonify({"response": response})  
+    user_input = data["message"]
+    mode = data.get("mode", "teasing")  # Default mode
 
-if __name__ == "__main__":  
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    response_text = random.choice(responses.get(mode, responses["casual"]))
+
+    return jsonify({"response": response_text})
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)  # Render ke liye port 10000
