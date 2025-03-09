@@ -1,31 +1,39 @@
 from flask import Flask, request, jsonify
-import requests
+from flask_cors import CORS
+import openai
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Tumhare Local AI ka API (Mobile Flask App)
-LOCAL_AI_API = "http://192.168.1.100:5000/chat"  # Mobile ka Flask server IP
+# 🔹 OpenAI API Key (Apni API key daalo)
+openai.api_key = "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"
 
 @app.route("/")
 def home():
-    return "Server is Online and Listening for AI responses!"
+    return "AI Chat API is Running!"
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.json
-    if not data or "message" not in data:
-        return jsonify({"error": "Invalid request"}), 400
-
-    user_message = data["message"]
-
-    # Local AI Flask Server Se Response Lo
     try:
-        response = requests.post(LOCAL_AI_API, json={"message": user_message})
-        ai_reply = response.json().get("response", "No response from AI.")
-    except Exception as e:
-        ai_reply = "Error: Local AI is not online!"
+        data = request.json
+        if not data or "message" not in data:
+            return jsonify({"error": "Invalid request"}), 400
 
-    return jsonify({"response": ai_reply})
+        user_input = data["message"]
+        
+        # 🔹 OpenAI API call for better response
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "Tum ek teasing, seductive aur friendly AI ho."},
+                      {"role": "user", "content": user_input}]
+        )
+        reply = response["choices"][0]["message"]["content"]
+
+        return jsonify({"response": reply}), 200
+    
+    except Exception as e:
+        print("❌ Error:", str(e))  # 🔹 Print error in Render logs
+        return jsonify({"error": "Server error!", "details": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(debug=True, host="0.0.0.0", port=10000)
