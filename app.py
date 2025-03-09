@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import openai
+import openai import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # 🔹 OpenAI API Key (Apni API key daalo)
-openai.api_key = "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"
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/")
 def home():
