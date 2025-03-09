@@ -6,7 +6,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # 🔹 OpenAI API Key (Apni API key daalo)
-openai.api_key = "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"
+openai.api_key = "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"
 
 @app.route("/")
 def home():
