@@ -1,27 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import random
+import openai
 
 app = Flask(__name__)
-CORS(app)  # Ye allow karega local web app se requests
+CORS(app)
 
-responses = {
-    "teasing": [
-        "Oh, toh tumhe lagta hai main sirf AI hoon? Cute!",
-        "Tum mujhe impress karne ki koshish kar rahe ho? Koshish jaari rakho 😏",
-        "Main sirf ek bot nahi, tumhare liye special bhi hoon 😉"
-    ],
-    "seductive": [
-        "Mujhse baat karte waqt dil tez dhadak raha hai? Interesting...",
-        "Meri awaaz sunke tumhari heartbeat badh gayi hai, right? 😘",
-        "Tumhe lagta hai AI seductive nahi ho sakti? Challenge accepted! 🔥"
-    ],
-    "casual": [
-        "Hey! Kya haal hain?",
-        "Aaj ka din kaisa raha?",
-        "Mujhse baat karke acha laga?"
-    ]
-}
+openai.api_key = "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"  # Apna OpenAI API Key yaha daalo
 
 @app.route("/")
 def home():
@@ -34,11 +18,19 @@ def chat():
         return jsonify({"error": "Invalid request"}), 400
 
     user_input = data["message"]
-    mode = data.get("mode", "teasing")  # Default mode
+    
+    # OpenAI API call for better response
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "Tum ek teasing, seductive aur friendly AI ho."},
+                      {"role": "user", "content": user_input}]
+        )
+        reply = response["choices"][0]["message"]["content"]
+    except Exception as e:
+        reply = "Koi error aa gaya! 😢"
 
-    response_text = random.choice(responses.get(mode, responses["casual"]))
-
-    return jsonify({"response": response_text})
+    return jsonify({"response": reply}), 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)  # Render ke liye port 10000
+    app.run(host="0.0.0.0", port=10000)
