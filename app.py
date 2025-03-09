@@ -21,13 +21,16 @@ def chat():
 
         user_input = data["message"]
         
-        # 🔹 OpenAI API call for better response
+        # 🔹 Naya OpenAI API Syntax
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "Tum ek teasing, seductive aur friendly AI ho."},
-                      {"role": "user", "content": user_input}]
+            messages=[
+                {"role": "system", "content": "Tum ek teasing, seductive aur friendly AI ho."},
+                {"role": "user", "content": user_input}
+            ]
         )
-        reply = response["choices"][0]["message"]["content"]
+
+        reply = response.choices[0].message.content  # ✅ Naya syntax yeh use karega
 
         return jsonify({"response": reply}), 200
     
