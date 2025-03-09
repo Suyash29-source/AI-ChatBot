@@ -1,15 +1,14 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-import openai
+import requests
 
 app = Flask(__name__)
-CORS(app)
 
-openai.api_key = "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"  # Apna OpenAI API Key yaha daalo
+# Tumhare Local AI ka API (Mobile Flask App)
+LOCAL_AI_API = "http://192.168.1.100:5000/chat"  # Mobile ka Flask server IP
 
 @app.route("/")
 def home():
-    return "AI Chat API Running!"
+    return "Server is Online and Listening for AI responses!"
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -17,20 +16,16 @@ def chat():
     if not data or "message" not in data:
         return jsonify({"error": "Invalid request"}), 400
 
-    user_input = data["message"]
-    
-    # OpenAI API call for better response
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "Tum ek teasing, seductive aur friendly AI ho."},
-                      {"role": "user", "content": user_input}]
-        )
-        reply = response["choices"][0]["message"]["content"]
-    except Exception as e:
-        reply = "Koi error aa gaya! 😢"
+    user_message = data["message"]
 
-    return jsonify({"response": reply}), 200
+    # Local AI Flask Server Se Response Lo
+    try:
+        response = requests.post(LOCAL_AI_API, json={"message": user_message})
+        ai_reply = response.json().get("response", "No response from AI.")
+    except Exception as e:
+        ai_reply = "Error: Local AI is not online!"
+
+    return jsonify({"response": ai_reply})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
