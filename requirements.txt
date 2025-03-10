@@ -5,3 +5,4 @@ flask_cors
 torch
 transformers
 accelerate>=0.26.0
+google-generativeai
