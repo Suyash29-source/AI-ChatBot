@@ -3,14 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Chatbot</title>
+    <title>Universal AI ChatBot</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: black; color: white; }
+        #chatbox { width: 80%; max-width: 600px; margin: auto; border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; background: white; color: black; }
+        input, button { padding: 10px; margin-top: 10px; }
+        #errorbox { color: red; font-weight: bold; margin-top: 10px; }
+        img { width: 300px; margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <h2>Chat with AI</h2>
-    <form method="POST">
-        <input type="text" name="message" placeholder="Type your message..." required>
-        <button type="submit">Send</button>
-    </form>
-    <p><strong>Bot:</strong> {{ response }}</p>
+    <h1>Universal AI ChatBot</h1>
+    <div>
+        <input type="text" id="modelInput" placeholder="Paste Hugging Face Model Name">
+        <button onclick="setModel()">Set Model</button>
+    </div>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+    <div id="errorbox"></div>
+
+    <script>
+        function setModel() {
+            let modelName = document.getElementById("modelInput").value;
+            fetch("http://127.0.0.1:5000/set_model", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ model_name: modelName })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => console.error("Error:", error));
+        }
+
+        function sendMessage() {
+            let userText = document.getElementById("userInput").value;
+            let chatbox = document.getElementById("chatbox");
+
+            if (userText.trim() === "") return;
+
+            chatbox.innerHTML += "<p><strong>You:</strong> " + userText + "</p>";
+            document.getElementById("userInput").value = "";
+
+            fetch("http://127.0.0.1:5000/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.reply) {
+                    chatbox.innerHTML += "<p><strong>Bot:</strong> " + data.reply + "</p>";
+                } else if (data.image) {
+                    chatbox.innerHTML += `<p><strong>Bot:</strong><br><img src="${data.image}" /></p>`;
+                } else if (data.error) {
+                    document.getElementById("errorbox").innerText = "Error: " + data.error;
+                }
+                chatbox.scrollTop = chatbox.scrollHeight;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
 </body>
 </html>
